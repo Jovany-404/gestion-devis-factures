@@ -47,6 +47,23 @@ class ClientManagementTest extends TestCase
         ]);
     }
 
+    public function test_client_creation_detail_and_edit_screens_render(): void
+    {
+        $client = Client::create(['name' => 'Camille Martin']);
+
+        $this->get(route('clients.create'))
+            ->assertOk()
+            ->assertSee('Ajouter un client');
+
+        $this->get(route('clients.show', $client))
+            ->assertOk()
+            ->assertSee('Camille Martin');
+
+        $this->get(route('clients.edit', $client))
+            ->assertOk()
+            ->assertSee('Modifier le client');
+    }
+
     public function test_client_name_is_required_and_email_must_be_valid(): void
     {
         $this->from(route('clients.create'))
