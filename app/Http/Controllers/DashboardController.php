@@ -6,11 +6,18 @@ use App\Models\Client;
 use App\Models\CompanyProfile;
 use App\Models\Document;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class DashboardController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(): View|RedirectResponse
     {
+        if (auth()->user()->canAccessClientPortal()) {
+            return to_route('portal.index');
+        }
+
+        abort_unless(auth()->user()->canAccessStaffWorkspace(), 403);
+
         return view('dashboard', [
             'clientCount' => Client::count(),
             'openQuotes' => Document::query()->ofType(Document::TYPE_QUOTE)->whereIn('status', ['draft', 'sent', 'accepted'])->count(),

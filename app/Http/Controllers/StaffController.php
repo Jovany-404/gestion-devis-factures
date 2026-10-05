@@ -13,7 +13,12 @@ class StaffController extends Controller
 {
     public function index(): View
     {
-        return view('staff.index', ['users' => User::query()->orderBy('name')->get()]);
+        return view('staff.index', [
+            'users' => User::query()
+                ->whereIn('role', [User::ROLE_ADMIN, User::ROLE_SALES, User::ROLE_ACCOUNTANT])
+                ->orderBy('name')
+                ->get(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -36,6 +41,7 @@ class StaffController extends Controller
     public function destroy(User $user): RedirectResponse
     {
         abort_if($user->isAdministrator(), 403, 'Un administrateur ne peut pas supprimer un autre administrateur.');
+        abort_unless(in_array($user->role, [User::ROLE_SALES, User::ROLE_ACCOUNTANT], true), 404);
 
         if ($user->documents()->exists()) {
             return to_route('staff.index')

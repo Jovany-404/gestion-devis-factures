@@ -30,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
             [User::ROLE_ADMIN, User::ROLE_ACCOUNTANT],
             true
         ));
-        Gate::define('access-api', fn (User $user): bool => true);
+        Gate::define('access-staff', fn (User $user): bool => $user->canAccessStaffWorkspace());
+        Gate::define('access-client', fn (User $user): bool => $user->canAccessClientPortal());
+        Gate::define('access-api', fn (User $user): bool => $user->canAccessStaffWorkspace());
     }
 }

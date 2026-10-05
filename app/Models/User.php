@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -24,6 +25,7 @@ class User extends Authenticatable
         'name',
         'email',
         'role',
+        'client_id',
         'password',
     ];
 
@@ -33,6 +35,8 @@ class User extends Authenticatable
 
     public const ROLE_ACCOUNTANT = 'accountant';
 
+    public const ROLE_CLIENT = 'client';
+
     public function isAdministrator(): bool
     {
         return $this->role === self::ROLE_ADMIN;
@@ -41,6 +45,25 @@ class User extends Authenticatable
     public function canManageDocuments(): bool
     {
         return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_SALES], true);
+    }
+
+    public function canAccessStaffWorkspace(): bool
+    {
+        return in_array($this->role, [
+            self::ROLE_ADMIN,
+            self::ROLE_SALES,
+            self::ROLE_ACCOUNTANT,
+        ], true);
+    }
+
+    public function canAccessClientPortal(): bool
+    {
+        return $this->role === self::ROLE_CLIENT && $this->client_id !== null;
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function documents(): HasMany

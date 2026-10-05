@@ -5,6 +5,7 @@ use App\Http\Controllers\ApiTokenController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ClientPortalController;
 use App\Http\Controllers\CompanyProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
@@ -23,7 +24,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/', DashboardController::class)->name('dashboard');
+});
 
+Route::middleware(['auth', 'can:access-staff'])->group(function () {
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
     Route::get('/clients/create', [ClientController::class, 'create'])->middleware('can:manage-documents')->name('clients.create');
     Route::post('/clients', [ClientController::class, 'store'])->middleware('can:manage-documents')->name('clients.store');
@@ -67,3 +70,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/staff', [StaffController::class, 'store'])->middleware('can:manage-staff')->name('staff.store');
     Route::delete('/staff/{user}', [StaffController::class, 'destroy'])->middleware('can:manage-staff')->name('staff.destroy');
 });
+
+Route::middleware(['auth', 'can:access-client'])
+    ->prefix('portal')
+    ->name('portal.')
+    ->group(function () {
+        Route::get('/', [ClientPortalController::class, 'index'])->name('index');
+        Route::get('/documents/{document}', [ClientPortalController::class, 'show'])->name('documents.show');
+        Route::get('/documents/{document}/pdf', [ClientPortalController::class, 'downloadPdf'])->name('documents.pdf');
+        Route::post('/quotes/{document}/accept', [ClientPortalController::class, 'acceptQuote'])->name('quotes.accept');
+        Route::post('/quotes/{document}/reject', [ClientPortalController::class, 'rejectQuote'])->name('quotes.reject');
+    });

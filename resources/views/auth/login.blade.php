@@ -3,9 +3,9 @@
 @section('title', 'Connexion')
 
 @section('content')
-    <p class="eyebrow">ESPACE DE TRAVAIL</p>
+    <p class="eyebrow">ACCÈS SÉCURISÉ</p>
     <h1>Connexion</h1>
-    <p class="muted auth-intro">Accédez à vos clients, à vos devis et au suivi des règlements.</p>
+    <p class="muted auth-intro">Connectez-vous à l’espace entreprise ou à votre espace client.</p>
     @if ($setupRequired)
         <div class="flash-warning">Première utilisation : créez le compte administrateur pour initialiser l’espace de travail.</div>
         <a class="button button-primary button-full" href="{{ route('register') }}">Créer l’espace de travail</a>
@@ -18,5 +18,5 @@
             <button class="button button-primary button-full" type="submit">Se connecter</button>
         </form>
     @endif
-    <p class="auth-footnote">Accès réservé aux membres de l’entreprise.</p>
+    <p class="auth-footnote">L’accès client est fourni par votre prestataire.</p>
 @endsection

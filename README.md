@@ -58,6 +58,29 @@ php artisan queue:work --tries=3 --timeout=120
 
 Le téléchargement d’un PDF le génère aussi à la demande si le worker n’a pas encore traité le travail.
 
+## Espace de démonstration isolé
+
+Pour essayer l’application avec une entreprise et des comptes clients fictifs, lancez `.\scripts\Start-Demo.ps1` dans PowerShell. Cette commande crée la base séparée `database\demo.sqlite`, y applique les migrations et démarre une seconde instance à <http://127.0.0.1:8001>. Votre base habituelle et vos données ne sont pas remplacées. Si une configuration Laravel est en cache, videz-la avec `php artisan config:clear` avant de lancer le script.
+
+Tous les noms et dossiers ci-dessous sont fictifs. Les adresses utilisent le domaine réservé `.test` et ne reçoivent pas de courriels. Ces identifiants fixes sont réservés à la base locale de démonstration ; ne les utilisez jamais sur une instance exposée en production.
+
+**Compte entreprise — Studio Noroît (démonstration)**
+
+- E-mail : `gestion@studio-noroit.example.test`
+- Mot de passe : `AtelierDemo-2026!`
+
+**Comptes clients**
+
+| Client | E-mail | Mot de passe | Prestation de démonstration |
+|---|---|---|---|
+| Claire Dubois · Café du Canal | `claire.dubois@cafe-du-canal.example.test` | `ClaireDemo-2026!` | Identité visuelle · devis à consulter |
+| Thomas Lefèvre · Brûlerie des Chartrons | `thomas.lefevre@brulerie-chartrons.example.test` | `ThomasDemo-2026!` | Site vitrine · facture envoyée |
+| Sarah Benali · Yoga des Quais | `sarah.benali@yoga-des-quais.example.test` | `SarahDemo-2026!` | Visibilité locale · facture réglée |
+
+Les comptes clients arrivent dans un espace séparé de l’interface entreprise. Ils peuvent consulter et télécharger leurs propres documents et répondre à un devis envoyé ; ils ne peuvent ni accéder aux dossiers d’autres clients, ni ouvrir les fonctions d’administration.
+
+Le catalogue de démonstration contient aussi la maintenance mensuelle. Les modifications apportées à cet environnement restent dans `database\demo.sqlite`. Pour réinitialiser complètement la démonstration, arrêtez son serveur puis supprimez `database\demo.sqlite` et `storage\app\demo-private`; le script recréera les données au prochain démarrage.
+
 Pour utiliser MySQL, crée une base vide dans XAMPP, puis indique `DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` et `DB_PASSWORD` dans `.env` avant de lancer les migrations.
 
 ## Configuration de déploiement

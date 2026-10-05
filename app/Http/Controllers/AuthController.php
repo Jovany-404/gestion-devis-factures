@@ -34,7 +34,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return to_route('dashboard');
+        return to_route($request->user()->canAccessClientPortal() ? 'portal.index' : 'dashboard');
     }
 
     public function showRegistration(): View|RedirectResponse
