@@ -42,6 +42,16 @@ class User extends Authenticatable
         return $this->role === self::ROLE_ADMIN;
     }
 
+    public static function roleLabel(string $role): string
+    {
+        return match ($role) {
+            self::ROLE_ADMIN => 'Administrateur',
+            self::ROLE_ACCOUNTANT => 'Comptabilité',
+            self::ROLE_CLIENT => 'Client',
+            default => 'Commercial',
+        };
+    }
+
     public function canManageDocuments(): bool
     {
         return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_SALES], true);

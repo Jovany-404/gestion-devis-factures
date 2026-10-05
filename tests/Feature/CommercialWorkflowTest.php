@@ -77,6 +77,24 @@ class CommercialWorkflowTest extends TestCase
         $response->assertRedirect(route('quotes.show', $quote));
     }
 
+    public function test_document_list_pages_render_the_status_filters(): void
+    {
+        $this->get(route('quotes.index'))
+            ->assertOk()
+            ->assertSee('Brouillon')
+            ->assertSee('Envoyé')
+            ->assertSee('Accepté');
+
+        $this->get(route('invoices.index'))
+            ->assertOk()
+            ->assertSee('En retard')
+            ->assertSee('Payé');
+
+        $this->get(route('staff.index'))
+            ->assertOk()
+            ->assertSee('Administrateur');
+    }
+
     public function test_quote_lifecycle_converts_once_to_a_snapshot_invoice_and_records_payment(): void
     {
         $this->post(route('quotes.store'), $this->quotePayload())->assertSessionHasNoErrors();

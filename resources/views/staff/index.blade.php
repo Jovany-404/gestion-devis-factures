@@ -19,7 +19,7 @@
         <section class="panel">
             <div class="panel-heading"><div><h2>Comptes actifs</h2><p class="muted">{{ $users->count() }} membre{{ $users->count() === 1 ? '' : 's' }} dans l’espace de travail.</p></div></div>
             <div class="table-wrap"><table class="data-table"><thead><tr><th>MEMBRE</th><th>RÔLE</th><th></th></tr></thead><tbody>
-                @foreach ($users as $user)<tr><td><span class="table-primary">{{ $user->name }}</span><span class="table-secondary">{{ $user->email }}</span></td><td>{{ match($user->role) { 'admin' => 'Administrateur', 'accountant' => 'Comptabilité', default => 'Commercial' } }}</td><td>@if (! $user->isAdministrator())<form action="{{ route('staff.destroy', $user) }}" method="POST" onsubmit="return confirm('Supprimer ce compte et révoquer ses jetons API ?')">@csrf @method('DELETE')<button class="link-button" type="submit">Révoquer l’accès</button></form>@else<span class="muted">Administrateur actif</span>@endif</td></tr>@endforeach
+                @foreach ($users as $user)<tr><td><span class="table-primary">{{ $user->name }}</span><span class="table-secondary">{{ $user->email }}</span></td><td>{{ \App\Models\User::roleLabel($user->role) }}</td><td>@if (! $user->isAdministrator())<form action="{{ route('staff.destroy', $user) }}" method="POST" onsubmit="return confirm('Supprimer ce compte et révoquer ses jetons API ?')">@csrf @method('DELETE')<button class="link-button" type="submit">Révoquer l’accès</button></form>@else<span class="muted">Administrateur actif</span>@endif</td></tr>@endforeach
             </tbody></table></div>
         </section>
     </div>

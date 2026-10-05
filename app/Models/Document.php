@@ -105,7 +105,12 @@ class Document extends Model
 
     public function statusLabel(): string
     {
-        return match ($this->displayStatus()) {
+        return self::labelForStatus($this->displayStatus());
+    }
+
+    public static function labelForStatus(string $status): string
+    {
+        return match ($status) {
             'draft' => 'Brouillon',
             'sent' => 'Envoyé',
             'accepted' => 'Accepté',
