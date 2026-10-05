@@ -38,7 +38,7 @@
                 <div class="table-wrap"><table class="data-table"><thead><tr><th>DOCUMENT</th><th>DATE</th><th>STATUT</th><th>TOTAL TTC</th></tr></thead><tbody>
                     @foreach ($client->documents as $document)
                         @php($documentRoute = $document->type === \App\Models\Document::TYPE_QUOTE ? 'quotes.show' : 'invoices.show')
-                        <tr><td><a class="table-primary" href="{{ route($documentRoute, $document) }}">{{ $document->number }}</a></td><td>{{ $document->issue_date->format('d/m/Y') }}</td><td>{{ $document->statusLabel() }}</td><td class="amount-cell">{{ number_format((float) $document->total, 2, ',', ' ') }} €</td></tr>
+                        <tr><td><a class="table-primary" href="{{ route($documentRoute, $document) }}">{{ $document->number }}</a></td><td>{{ $document->issue_date->format('d/m/Y') }}</td><td>{{ $document->statusLabel() }}</td><td class="amount-cell">{{ $document->formatAmount($document->total) }}</td></tr>
                     @endforeach
                 </tbody></table></div>
             @endif

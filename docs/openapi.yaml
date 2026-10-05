@@ -68,7 +68,7 @@ paths:
         - $ref: '#/components/parameters/Page'
       responses:
         '200':
-          description: Page d’articles actifs. Les prix sont en EUR hors taxes.
+          description: Page d’articles actifs. La devise applicable à chaque prix est indiquée par la propriété currency.
           content:
             application/json:
               schema:
@@ -365,7 +365,8 @@ components:
         name: { type: string }
         description: { type: [string, 'null'] }
         unit: { type: string }
-        unit_price: { type: string, description: Prix unitaire hors taxes en EUR }
+        unit_price: { type: string, description: Prix unitaire hors taxes, avec deux décimales }
+        currency: { type: string, enum: [EUR, XOF], description: Devise du profil de l’entreprise }
         tax_rate: { type: string }
         is_active: { type: boolean }
     ArticlePage:
@@ -417,7 +418,7 @@ components:
         issue_date: { type: string, format: date }
         due_date: { type: [string, 'null'], format: date }
         valid_until: { type: [string, 'null'], format: date }
-        currency: { type: string, enum: [EUR] }
+        currency: { type: string, enum: [EUR, XOF] }
         subtotal: { type: string }
         tax_total: { type: string }
         total: { type: string }

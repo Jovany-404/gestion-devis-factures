@@ -14,6 +14,7 @@ class CompanyProfile extends Model
         'postal_code',
         'city',
         'country',
+        'currency',
         'registration_number',
         'vat_number',
         'iban',
@@ -42,5 +43,21 @@ class CompanyProfile extends Model
             && filled($this->address)
             && filled($this->postal_code)
             && filled($this->city);
+    }
+
+    public function currencyLabel(): string
+    {
+        return match ($this->currency) {
+            'EUR' => '€',
+            'XOF' => 'FCFA',
+            default => $this->currency,
+        };
+    }
+
+    public function formatAmount(float|string $amount): string
+    {
+        $precision = $this->currency === 'XOF' ? 0 : 2;
+
+        return number_format((float) $amount, $precision, ',', ' ').' '.$this->currencyLabel();
     }
 }

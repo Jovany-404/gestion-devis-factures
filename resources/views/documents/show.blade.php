@@ -16,9 +16,9 @@
             <h2>Prestations</h2>
             <div class="table-wrap"><table class="data-table">
                 <thead><tr><th>DÉSIGNATION</th><th>QTÉ</th><th>PRIX HT</th><th>TVA</th><th class="text-right">TOTAL TTC</th></tr></thead>
-                <tbody>@foreach ($document->lines as $line)<tr><td><span class="table-primary">{{ $line->description }}</span><span class="table-secondary">Unité : {{ $line->unit }}</span></td><td>{{ number_format((float) $line->quantity, 2, ',', ' ') }}</td><td>{{ number_format((float) $line->unit_price, 2, ',', ' ') }} €</td><td>{{ number_format((float) $line->tax_rate, 2, ',', ' ') }} %</td><td class="amount-cell">{{ number_format((float) $line->total, 2, ',', ' ') }} €</td></tr>@endforeach</tbody>
+                <tbody>@foreach ($document->lines as $line)<tr><td><span class="table-primary">{{ $line->description }}</span><span class="table-secondary">Unité : {{ $line->unit }}</span></td><td>{{ number_format((float) $line->quantity, 2, ',', ' ') }}</td><td>{{ $document->formatAmount($line->unit_price) }}</td><td>{{ number_format((float) $line->tax_rate, 2, ',', ' ') }} %</td><td class="amount-cell">{{ $document->formatAmount($line->total) }}</td></tr>@endforeach</tbody>
             </table></div>
-            <div class="line-summary document-totals"><div><span>Sous-total HT</span><strong>{{ number_format((float) $document->subtotal, 2, ',', ' ') }} €</strong></div><div><span>TVA</span><strong>{{ number_format((float) $document->tax_total, 2, ',', ' ') }} €</strong></div><div class="summary-total"><span>Total TTC</span><strong>{{ number_format((float) $document->total, 2, ',', ' ') }} €</strong></div></div>
+            <div class="line-summary document-totals"><div><span>Sous-total HT</span><strong>{{ $document->formatAmount($document->subtotal) }}</strong></div><div><span>TVA</span><strong>{{ $document->formatAmount($document->tax_total) }}</strong></div><div class="summary-total"><span>Total TTC</span><strong>{{ $document->formatAmount($document->total) }}</strong></div></div>
             @if ($document->notes)<div class="document-note"><h3>Note au client</h3><p>{{ $document->notes }}</p></div>@endif
             @if ($document->terms)<div class="document-note"><h3>Conditions</h3><p>{{ $document->terms }}</p></div>@endif
         </section>

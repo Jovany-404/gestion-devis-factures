@@ -69,7 +69,7 @@ class DocumentService
             $issueDate = $data['issue_date'];
             $validUntil = $data['valid_until']
                 ?? Carbon::parse($issueDate)->addDays($profile->quote_validity_days)->toDateString();
-            $lines = $this->priceLines($data['lines']);
+            $lines = $this->priceLines($data['lines'], $profile->currency);
             $totals = $this->totals($lines);
 
             $document = Document::create([
@@ -83,7 +83,7 @@ class DocumentService
                 'created_by' => $user->id,
                 'issue_date' => $issueDate,
                 'valid_until' => $validUntil,
-                'currency' => 'EUR',
+                'currency' => $profile->currency,
                 'client_snapshot' => $this->clientSnapshot($client),
                 'company_snapshot' => $this->companySnapshot($profile),
                 'notes' => $data['notes'] ?? null,
@@ -105,7 +105,7 @@ class DocumentService
 
             $client = Client::query()->findOrFail($data['client_id']);
             $profile = CompanyProfile::current();
-            $lines = $this->priceLines($data['lines']);
+            $lines = $this->priceLines($data['lines'], $document->currency);
 
             $document->update([
                 'client_id' => $client->id,
@@ -188,7 +188,7 @@ class DocumentService
      * @param  array<int, array{article_id: int, quantity: int|float|string}>  $input
      * @return array<int, array<string, int|float|string|null>>
      */
-    private function priceLines(array $input): array
+    private function priceLines(array $input, string $currency): array
     {
         $articles = Article::query()
             ->where('is_active', true)
@@ -202,12 +202,28 @@ class DocumentService
             ]);
         }
 
-        return collect($input)->map(function (array $inputLine) use ($articles): array {
+        return collect($input)->map(function (array $inputLine) use ($articles, $currency): array {
             $article = $articles->get((int) $inputLine['article_id']);
             $quantity = (float) $inputLine['quantity'];
-            $unitPriceCents = (int) round((float) $article->unit_price * 100, 0, PHP_ROUND_HALF_UP);
-            $subtotalCents = (int) round($quantity * $unitPriceCents, 0, PHP_ROUND_HALF_UP);
-            $taxCents = (int) round($subtotalCents * (float) $article->tax_rate / 100, 0, PHP_ROUND_HALF_UP);
+            $minorUnitsPerUnit = $currency === 'XOF' ? 1 : 100;
+            $precision = $currency === 'XOF' ? 0 : 2;
+            $unitPriceMinor = (int) round(
+                (float) $article->unit_price * $minorUnitsPerUnit,
+                0,
+                PHP_ROUND_HALF_UP
+            );
+            $subtotalMinor = (int) round($quantity * $unitPriceMinor, 0, PHP_ROUND_HALF_UP);
+            $taxMinor = (int) round(
+                $subtotalMinor * (float) $article->tax_rate / 100,
+                0,
+                PHP_ROUND_HALF_UP
+            );
+            $formatAmount = static fn (int $amount): string => number_format(
+                $amount / $minorUnitsPerUnit,
+                $precision,
+                '.',
+                ''
+            );
 
             return [
                 'article_id' => $article->id,
@@ -216,11 +232,11 @@ class DocumentService
                     : $article->name,
                 'unit' => $article->unit,
                 'quantity' => number_format($quantity, 2, '.', ''),
-                'unit_price' => number_format($unitPriceCents / 100, 2, '.', ''),
+                'unit_price' => $formatAmount($unitPriceMinor),
                 'tax_rate' => $article->tax_rate,
-                'subtotal' => number_format($subtotalCents / 100, 2, '.', ''),
-                'tax_amount' => number_format($taxCents / 100, 2, '.', ''),
-                'total' => number_format(($subtotalCents + $taxCents) / 100, 2, '.', ''),
+                'subtotal' => $formatAmount($subtotalMinor),
+                'tax_amount' => $formatAmount($taxMinor),
+                'total' => $formatAmount($subtotalMinor + $taxMinor),
             ];
         })->all();
     }

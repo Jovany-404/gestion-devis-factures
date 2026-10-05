@@ -32,7 +32,8 @@ class DocumentController extends Controller
 
     public function createQuote(Request $request): View|RedirectResponse
     {
-        if (! CompanyProfile::current()->isReadyForDocuments()) {
+        $profile = CompanyProfile::current();
+        if (! $profile->isReadyForDocuments()) {
             return to_route('company.edit')
                 ->with('warning', 'Renseignez le nom, l’adresse et l’e-mail de l’entreprise avant d’émettre un devis.');
         }
@@ -40,10 +41,12 @@ class DocumentController extends Controller
         return view('documents.create', [
             'clients' => Client::query()->orderBy('name')->get(),
             'articles' => Article::query()->where('is_active', true)->orderBy('name')->get(),
+            'currency' => $profile->currency,
             'document' => new Document([
                 'issue_date' => today(),
-                'valid_until' => today()->addDays(CompanyProfile::current()->quote_validity_days),
+                'valid_until' => today()->addDays($profile->quote_validity_days),
                 'client_id' => $request->integer('client_id') ?: null,
+                'currency' => $profile->currency,
             ]),
         ]);
     }
@@ -70,6 +73,7 @@ class DocumentController extends Controller
             'clients' => Client::query()->orderBy('name')->get(),
             'articles' => Article::query()->where('is_active', true)->orderBy('name')->get(),
             'document' => $document->load('lines'),
+            'currency' => $document->currency,
         ]);
     }
 

@@ -64,7 +64,7 @@ Pour essayer l’application avec une entreprise et des comptes clients fictifs,
 
 Tous les noms et dossiers ci-dessous sont fictifs. Les adresses utilisent le domaine réservé `.test` et ne reçoivent pas de courriels. Ces identifiants fixes sont réservés à la base locale de démonstration ; ne les utilisez jamais sur une instance exposée en production.
 
-**Compte entreprise — Studio Noroît (démonstration)**
+**Compte entreprise — Studio Noroît (démonstration, Dakar)**
 
 - E-mail : `gestion@studio-noroit.example.test`
 - Mot de passe : `AtelierDemo-2026!`
@@ -76,6 +76,8 @@ Tous les noms et dossiers ci-dessous sont fictifs. Les adresses utilisent le dom
 | Claire Dubois · Café du Canal | `claire.dubois@cafe-du-canal.example.test` | `ClaireDemo-2026!` | Identité visuelle · devis à consulter |
 | Thomas Lefèvre · Brûlerie des Chartrons | `thomas.lefevre@brulerie-chartrons.example.test` | `ThomasDemo-2026!` | Site vitrine · facture envoyée |
 | Sarah Benali · Yoga des Quais | `sarah.benali@yoga-des-quais.example.test` | `SarahDemo-2026!` | Visibilité locale · facture réglée |
+
+Les montants de démonstration sont en francs CFA BCEAO (XOF), sans centimes, avec un taux de TVA de 18 %. Les forfaits sont des estimations indicatives de milieu de marché pour une petite agence ou un prestataire indépendant à Dakar : identité visuelle **180 000 FCFA**, site vitrine de cinq pages **450 000 FCFA**, visibilité locale **120 000 FCFA** et maintenance **35 000 FCFA par mois**. Les prix varient selon le périmètre, l’expérience et le prestataire ; ces exemples ne constituent pas un barème officiel ni un devis commercial.
 
 Les comptes clients arrivent dans un espace séparé de l’interface entreprise. Ils peuvent consulter et télécharger leurs propres documents et répondre à un devis envoyé ; ils ne peuvent ni accéder aux dossiers d’autres clients, ni ouvrir les fonctions d’administration.
 

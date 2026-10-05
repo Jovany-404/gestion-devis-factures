@@ -21,7 +21,7 @@ class DashboardController extends Controller
         return view('dashboard', [
             'clientCount' => Client::count(),
             'openQuotes' => Document::query()->ofType(Document::TYPE_QUOTE)->whereIn('status', ['draft', 'sent', 'accepted'])->count(),
-            'quotePipeline' => Document::query()->ofType(Document::TYPE_QUOTE)->whereIn('status', ['draft', 'sent', 'accepted'])->sum('total'),
+            'quotePipeline' => Document::query()->ofType(Document::TYPE_QUOTE)->whereIn('status', ['draft', 'sent', 'accepted'])->sum('subtotal'),
             'outstandingInvoices' => Document::query()->ofType(Document::TYPE_INVOICE)->where('status', 'sent')->sum('total'),
             'paidThisMonth' => Document::query()->ofType(Document::TYPE_INVOICE)
                 ->where('status', 'paid')
@@ -30,6 +30,7 @@ class DashboardController extends Controller
                 ->sum('total'),
             'recentDocuments' => Document::query()->with('client')->latest('issue_date')->take(6)->get(),
             'profileReady' => CompanyProfile::current()->isReadyForDocuments(),
+            'profile' => CompanyProfile::current(),
         ]);
     }
 }

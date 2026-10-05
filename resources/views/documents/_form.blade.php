@@ -1,4 +1,4 @@
-<form action="{{ $document->exists ? route('quotes.update', $document) : route('quotes.store') }}" method="POST" id="document-form">
+<form action="{{ $document->exists ? route('quotes.update', $document) : route('quotes.store') }}" method="POST" id="document-form" data-currency="{{ $currency }}">
     @csrf
     @if ($document->exists) @method('PUT') @endif
     <div class="form-grid">
@@ -39,9 +39,9 @@
         </table>
     </div>
     <div class="line-summary">
-        <div><span>Sous-total HT</span><strong id="subtotal-preview">0,00 €</strong></div>
-        <div><span>TVA</span><strong id="tax-preview">0,00 €</strong></div>
-        <div class="summary-total"><span>Total TTC</span><strong id="total-preview">0,00 €</strong></div>
+        <div><span>Sous-total HT</span><strong id="subtotal-preview">{{ (new \App\Models\Document(['currency' => $currency]))->formatAmount(0) }}</strong></div>
+        <div><span>TVA</span><strong id="tax-preview">{{ (new \App\Models\Document(['currency' => $currency]))->formatAmount(0) }}</strong></div>
+        <div class="summary-total"><span>Total TTC</span><strong id="total-preview">{{ (new \App\Models\Document(['currency' => $currency]))->formatAmount(0) }}</strong></div>
     </div>
     <template id="line-template"><tr class="line-row">
         <td><select name="lines[__INDEX__][article_id]" class="line-article" required><option value="">Choisir une prestation</option>@foreach ($articles as $article)<option value="{{ $article->id }}" data-name="{{ $article->name }}" data-description="{{ $article->description }}" data-unit="{{ $article->unit }}" data-price="{{ $article->unit_price }}" data-tax="{{ $article->tax_rate }}">{{ $article->sku }} — {{ $article->name }}</option>@endforeach</select></td>

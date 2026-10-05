@@ -21,7 +21,7 @@ Les jetons sont stockés sous forme hachée par Sanctum et n’accordent jamais 
 
 ## Conventions
 
-- Les montants retournés sont des chaînes décimales en EUR, exprimées à deux chiffres.
+- Les montants retournés sont des chaînes décimales à deux chiffres. La devise est renvoyée sous `currency` avec chaque article et chaque document : `EUR` pour l’installation standard, `XOF` pour la démonstration Studio Noroît. Les montants XOF sont arrondis au franc dans l’interface ; dans l’API, ils restent sérialisés avec deux décimales.
 - Les dates sont au format ISO `YYYY-MM-DD`; les dates de création sont ISO 8601.
 - Les listes paginées utilisent une enveloppe `data` et des métadonnées `meta`.
 - Les montants et taux transmis par le client ne sont **pas** acceptés comme source de vérité : lors de la création d’un devis, le serveur relit le tarif et le taux de TVA de chaque article actif.

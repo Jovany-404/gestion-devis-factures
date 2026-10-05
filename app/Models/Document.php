@@ -108,6 +108,18 @@ class Document extends Model
         return self::labelForStatus($this->displayStatus());
     }
 
+    public function formatAmount(float|string $amount): string
+    {
+        $precision = $this->currency === 'XOF' ? 0 : 2;
+        $label = match ($this->currency) {
+            'EUR' => '€',
+            'XOF' => 'FCFA',
+            default => $this->currency,
+        };
+
+        return number_format((float) $amount, $precision, ',', ' ').' '.$label;
+    }
+
     public static function labelForStatus(string $status): string
     {
         return match ($status) {

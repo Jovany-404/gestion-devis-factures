@@ -44,7 +44,7 @@
                                 </td>
                                 <td>{{ $document->issue_date->format('d/m/Y') }}</td>
                                 <td><span class="status-badge status-{{ $document->displayStatus() }}">{{ $document->statusLabel() }}</span></td>
-                                <td class="amount-cell">{{ number_format((float) $document->total, 2, ',', ' ') }} €</td>
+                                <td class="amount-cell">{{ $document->formatAmount($document->total) }}</td>
                                 <td><a class="row-action" href="{{ route('portal.documents.show', $document) }}" aria-label="Consulter {{ $document->number }}">→</a></td>
                             </tr>
                         @endforeach

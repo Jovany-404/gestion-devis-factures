@@ -55,13 +55,13 @@
     <table class="lines">
         <thead><tr><th>Désignation</th><th>Qté</th><th>Unité</th><th class="right">Prix HT</th><th class="right">TVA</th><th class="right">Total TTC</th></tr></thead>
         <tbody>@foreach ($document->lines as $line)
-            <tr><td>{{ $line->description }}</td><td>{{ number_format((float) $line->quantity, 2, ',', ' ') }}</td><td>{{ $line->unit }}</td><td class="right">{{ number_format((float) $line->unit_price, 2, ',', ' ') }} €</td><td class="right">{{ number_format((float) $line->tax_rate, 2, ',', ' ') }} %</td><td class="right">{{ number_format((float) $line->total, 2, ',', ' ') }} €</td></tr>
+            <tr><td>{{ $line->description }}</td><td>{{ number_format((float) $line->quantity, 2, ',', ' ') }}</td><td>{{ $line->unit }}</td><td class="right">{{ $document->formatAmount($line->unit_price) }}</td><td class="right">{{ number_format((float) $line->tax_rate, 2, ',', ' ') }} %</td><td class="right">{{ $document->formatAmount($line->total) }}</td></tr>
         @endforeach</tbody>
     </table>
     <table class="totals">
-        <tr><td>Sous-total HT</td><td class="right">{{ number_format((float) $document->subtotal, 2, ',', ' ') }} €</td></tr>
-        <tr><td>TVA</td><td class="right">{{ number_format((float) $document->tax_total, 2, ',', ' ') }} €</td></tr>
-        <tr><td class="grand-total">Total TTC</td><td class="right grand-total">{{ number_format((float) $document->total, 2, ',', ' ') }} €</td></tr>
+        <tr><td>Sous-total HT</td><td class="right">{{ $document->formatAmount($document->subtotal) }}</td></tr>
+        <tr><td>TVA</td><td class="right">{{ $document->formatAmount($document->tax_total) }}</td></tr>
+        <tr><td class="grand-total">Total TTC</td><td class="right grand-total">{{ $document->formatAmount($document->total) }}</td></tr>
     </table>
     @if ($document->notes || $document->terms || $document->company_snapshot['iban'])
         <div class="notes">

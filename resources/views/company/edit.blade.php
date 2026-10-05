@@ -12,6 +12,7 @@
             <div class="field"><label for="postal_code">Code postal *</label><input id="postal_code" name="postal_code" value="{{ old('postal_code', $profile->postal_code) }}" required maxlength="20"></div>
             <div class="field"><label for="city">Ville *</label><input id="city" name="city" value="{{ old('city', $profile->city) }}" required maxlength="100"></div>
             <div class="field"><label for="country">Code pays ISO (ex. FR)</label><input id="country" name="country" value="{{ old('country', $profile->country) }}" required minlength="2" maxlength="2"></div>
+            <div class="field"><label for="currency">Devise des nouveaux documents</label><input id="currency" value="{{ $profile->currency }} ({{ $profile->currencyLabel() }})" disabled><span class="muted">La devise est définie par l’espace de démonstration ou l’installation.</span></div>
             <div class="field"><label for="registration_number">SIREN / numéro d’immatriculation</label><input id="registration_number" name="registration_number" value="{{ old('registration_number', $profile->registration_number) }}" maxlength="40"></div>
             <div class="field"><label for="vat_number">Numéro de TVA intracommunautaire</label><input id="vat_number" name="vat_number" value="{{ old('vat_number', $profile->vat_number) }}" maxlength="40"></div>
             <div class="field"><label for="iban">IBAN pour les règlements</label><input id="iban" name="iban" value="{{ old('iban', $profile->iban) }}" maxlength="34" autocomplete="off"></div>

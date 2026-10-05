@@ -5,7 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const rows = document.querySelector('#document-lines');
     const template = document.querySelector('#line-template');
     const addButton = document.querySelector('#add-line');
-    const money = value => `${value.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+    const currency = form.dataset.currency || 'EUR';
+    const decimals = currency === 'XOF' ? 0 : 2;
+    const symbol = currency === 'XOF' ? 'FCFA' : currency === 'EUR' ? '€' : currency;
+    const factor = decimals === 0 ? 1 : 100;
+    const money = value => `${value.toLocaleString('fr-FR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} ${symbol}`;
 
     const updateRow = row => {
         const option = row.querySelector('.line-article').selectedOptions[0];
@@ -13,14 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const unit = option?.dataset.unit;
         const price = Number(option?.dataset.price || 0);
         const tax = Number(option?.dataset.tax || 0);
-        const subtotal = Math.round(price * quantity * 100) / 100;
-        const total = Math.round(subtotal * (1 + tax / 100) * 100) / 100;
+        const subtotal = Math.round(price * quantity * factor) / factor;
+        const total = Math.round(subtotal * (1 + tax / 100) * factor) / factor;
 
         row.querySelector('.line-unit').textContent = unit || '—';
         row.querySelector('.line-price').textContent = option?.value ? money(price) : '—';
         row.querySelector('.line-tax').textContent = option?.value ? `${tax.toLocaleString('fr-FR')} %` : '—';
         row.querySelector('.line-total').textContent = option?.value ? money(total) : '—';
-        return { subtotal, tax: Math.round((total - subtotal) * 100) / 100, total };
+        return { subtotal, tax: Math.round((total - subtotal) * factor) / factor, total };
     };
 
     const updateTotals = () => {

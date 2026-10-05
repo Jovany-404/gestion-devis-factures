@@ -77,6 +77,40 @@ class CommercialWorkflowTest extends TestCase
         $response->assertRedirect(route('quotes.show', $quote));
     }
 
+    public function test_xof_quotes_use_whole_cfa_amounts_and_preserve_currency(): void
+    {
+        CompanyProfile::current()->update(['currency' => 'XOF']);
+        $this->article->update(['unit_price' => '10000', 'tax_rate' => '18']);
+
+        $this->post(route('quotes.store'), $this->quotePayload(['quantity' => 1.25]))
+            ->assertSessionHasNoErrors();
+
+        $quote = Document::query()->sole();
+        $line = $quote->lines()->sole();
+        $this->assertSame('XOF', $quote->currency);
+        $this->assertSame('12500.00', $line->subtotal);
+        $this->assertSame('2250.00', $line->tax_amount);
+        $this->assertSame('14750.00', $quote->total);
+        $this->assertSame('14 750 FCFA', $quote->formatAmount($quote->total));
+        $this->get('/')->assertOk()->assertSee('12 500 FCFA HT');
+    }
+
+    public function test_xof_catalogue_prices_are_saved_as_whole_cfa_amounts(): void
+    {
+        CompanyProfile::current()->update(['currency' => 'XOF']);
+
+        $this->post(route('articles.store'), [
+            'sku' => 'XOF-001',
+            'name' => 'Prestation XOF',
+            'description' => 'Tarif de test',
+            'unit' => 'forfait',
+            'unit_price' => '123.50',
+            'tax_rate' => '18',
+        ])->assertRedirect(route('articles.index'));
+
+        $this->assertSame('124.00', Article::query()->where('sku', 'XOF-001')->sole()->unit_price);
+    }
+
     public function test_document_list_pages_render_the_status_filters(): void
     {
         $this->get(route('quotes.index'))
@@ -174,8 +208,12 @@ class CommercialWorkflowTest extends TestCase
         $this->app['auth']->forgetGuards();
         $this->getJson('/api/v1/articles')->assertUnauthorized();
 
+        CompanyProfile::current()->update(['currency' => 'XOF']);
         $readToken = $this->administrator->createToken('read-only', ['documents:read'])->plainTextToken;
-        $this->withToken($readToken)->getJson('/api/v1/articles')->assertOk();
+        $this->withToken($readToken)
+            ->getJson('/api/v1/articles')
+            ->assertOk()
+            ->assertJsonPath('data.0.currency', 'XOF');
         $this->withToken($readToken)->postJson('/api/v1/quotes', $this->quotePayload())
             ->assertForbidden();
 

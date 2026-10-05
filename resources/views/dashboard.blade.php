@@ -30,16 +30,16 @@
         <a class="stat-card stat-link" href="{{ route('quotes.index') }}">
             <div class="stat-top"><span class="stat-icon icon-blue">03</span><span class="stat-caption">Devis à suivre</span></div>
             <strong class="stat-number">{{ $openQuotes }}</strong>
-            <span class="stat-label">En attente · {{ number_format((float) $quotePipeline, 2, ',', ' ') }} € HT</span>
+            <span class="stat-label">En attente · {{ $profile->formatAmount($quotePipeline) }} HT</span>
         </a>
         <a class="stat-card stat-link" href="{{ route('invoices.index', ['status' => 'sent']) }}">
             <div class="stat-top"><span class="stat-icon icon-amber">04</span><span class="stat-caption">Factures à encaisser</span></div>
-            <strong class="stat-number">{{ number_format((float) $outstandingInvoices, 2, ',', ' ') }} €</strong>
+            <strong class="stat-number">{{ $profile->formatAmount($outstandingInvoices) }}</strong>
             <span class="stat-label">Montant TTC en attente</span>
         </a>
         <div class="stat-card">
-            <div class="stat-top"><span class="stat-icon icon-green">€</span><span class="stat-caption">Encaissements du mois</span></div>
-            <strong class="stat-number">{{ number_format((float) $paidThisMonth, 2, ',', ' ') }} €</strong>
+            <div class="stat-top"><span class="stat-icon icon-green">{{ $profile->currencyLabel() }}</span><span class="stat-caption">Encaissements du mois</span></div>
+            <strong class="stat-number">{{ $profile->formatAmount($paidThisMonth) }}</strong>
             <span class="stat-label">Factures réglées ce mois-ci</span>
         </div>
     </section>
@@ -74,7 +74,7 @@
                             <td>{{ $document->client_snapshot['company'] ?: $document->client_snapshot['name'] }}</td>
                             <td>{{ $document->issue_date->format('d/m/Y') }}</td>
                             <td><span class="status-badge status-{{ $document->displayStatus() }}">{{ $document->statusLabel() }}</span></td>
-                            <td class="amount-cell">{{ number_format((float) $document->total, 2, ',', ' ') }} €</td>
+                            <td class="amount-cell">{{ $document->formatAmount($document->total) }}</td>
                             <td><a class="row-action" href="{{ route($route, $document) }}" aria-label="Ouvrir {{ $document->number }}">→</a></td>
                         </tr>
                     @endforeach

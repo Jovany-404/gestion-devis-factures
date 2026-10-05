@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Models\CompanyProfile;
 use Illuminate\Http\JsonResponse;
 
 class ApiArticleController extends Controller
@@ -14,6 +15,11 @@ class ApiArticleController extends Controller
             ->where('is_active', true)
             ->orderBy('name')
             ->paginate(50);
+        $currency = CompanyProfile::current()->currency;
+
+        $articles->getCollection()->each(
+            fn (Article $article) => $article->setAttribute('currency', $currency)
+        );
 
         return response()->json([
             'data' => $articles->items(),

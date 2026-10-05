@@ -23,7 +23,7 @@
                         <td class="table-secondary">{{ $article->sku }}</td>
                         <td><span class="table-primary">{{ $article->name }}</span><span class="table-secondary">{{ $article->description }}</span></td>
                         <td>{{ $article->unit }}</td>
-                        <td class="amount-cell">{{ number_format((float) $article->unit_price, 2, ',', ' ') }} €</td>
+                        <td class="amount-cell">{{ $profile->formatAmount($article->unit_price) }}</td>
                         <td>{{ number_format((float) $article->tax_rate, 2, ',', ' ') }} %</td>
                         <td><span class="status-badge status-{{ $article->is_active ? 'active' : 'archived' }}">{{ $article->is_active ? 'Actif' : 'Archivé' }}</span></td>
                         <td>@can('manage-catalog')@if ($article->is_active)<div class="heading-actions"><a class="row-action" href="{{ route('articles.edit', $article) }}" aria-label="Modifier {{ $article->name }}">Modifier</a><form action="{{ route('articles.destroy', $article) }}" method="POST">@csrf @method('DELETE')<button class="link-button" type="submit">Archiver</button></form></div>@endif @endcan</td>
