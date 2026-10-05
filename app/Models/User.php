@@ -5,13 +5,15 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,8 +23,30 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
         'password',
     ];
+
+    public const ROLE_ADMIN = 'admin';
+
+    public const ROLE_SALES = 'sales';
+
+    public const ROLE_ACCOUNTANT = 'accountant';
+
+    public function isAdministrator(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function canManageDocuments(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_SALES], true);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class, 'created_by');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

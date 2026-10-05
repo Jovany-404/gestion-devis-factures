@@ -6,11 +6,11 @@
 @section('content')
     <div class="page-heading">
         <div>
-            <p class="eyebrow">VOTRE CARNET D'ADRESSES</p>
+            <p class="eyebrow">RÉFÉRENTIEL CLIENTS</p>
             <h1>Clients</h1>
-            <p class="muted">Retrouvez et gérez les coordonnées de vos clients.</p>
+            <p class="muted">Coordonnées de facturation conservées avec l’historique des documents.</p>
         </div>
-        <a class="button button-primary" href="{{ route('clients.create') }}"><span>＋</span> Ajouter un client</a>
+        @can('manage-documents')<a class="button button-primary" href="{{ route('clients.create') }}">Ajouter un client</a>@endcan
     </div>
 
     <section class="panel">
@@ -27,7 +27,7 @@
 
         @if ($clients->isEmpty())
             <div class="empty-state">
-                <span class="empty-icon">⌕</span>
+                <span class="empty-icon">01</span>
                 <h3>{{ $search !== '' ? 'Aucun résultat' : 'Aucun client pour le moment' }}</h3>
                 <p>{{ $search !== '' ? 'Essayez avec un autre nom, e-mail ou ville.' : 'Créez une fiche pour retrouver facilement les coordonnées de vos clients.' }}</p>
                 @if ($search === '')
@@ -36,12 +36,12 @@
             </div>
         @else
             <div class="table-wrap">
-                <table>
+                <table class="data-table">
                     <thead><tr><th>CLIENT</th><th>E-MAIL</th><th>TÉLÉPHONE</th><th>VILLE</th><th></th></tr></thead>
                     <tbody>
                     @foreach ($clients as $client)
                         <tr>
-                            <td><a class="table-primary" href="{{ route('clients.show', $client) }}">{{ $client->name }}</a><span class="table-secondary">{{ $client->company ?: 'Particulier' }}</span></td>
+                            <td><a class="table-primary" href="{{ route('clients.show', $client) }}">{{ $client->company ?: $client->name }}</a><span class="table-secondary">{{ $client->company ? $client->name : 'Client particulier' }}</span></td>
                             <td>{{ $client->email ?: '—' }}</td>
                             <td>{{ $client->phone ?: '—' }}</td>
                             <td>{{ $client->city ?: '—' }}</td>

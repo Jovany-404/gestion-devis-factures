@@ -3,12 +3,27 @@
 namespace Tests\Feature;
 
 use App\Models\Client;
+use App\Models\CompanyProfile;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ClientManagementTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::create([
+            'name' => 'Camille Martin',
+            'email' => 'camille@example.test',
+            'password' => 'a secure test password',
+            'role' => User::ROLE_ADMIN,
+        ]));
+        CompanyProfile::current();
+    }
 
     public function test_dashboard_displays_client_summary_and_recent_clients(): void
     {
@@ -21,8 +36,8 @@ class ClientManagementTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('1')
-            ->assertSee('Camille Martin')
-            ->assertSee('camille@example.com');
+            ->assertSee('Client actif')
+            ->assertSee('Documents récents');
     }
 
     public function test_client_can_be_created_with_validated_contact_details(): void

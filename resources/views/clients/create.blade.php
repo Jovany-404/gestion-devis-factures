@@ -8,7 +8,7 @@
         <div>
             <p class="eyebrow">CARNET D'ADRESSES</p>
             <h1>Ajouter un client</h1>
-            <p class="muted">Les champs marqués d'un astérisque sont obligatoires.</p>
+            <p class="muted">Ajoutez les coordonnées qui seront reprises sur les prochains documents.</p>
         </div>
         <a class="button button-quiet" href="{{ route('clients.index') }}">← Retour aux clients</a>
     </div>

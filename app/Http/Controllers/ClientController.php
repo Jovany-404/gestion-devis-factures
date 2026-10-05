@@ -44,6 +44,8 @@ class ClientController extends Controller
 
     public function show(Client $client): View
     {
+        $client->load(['documents' => fn ($query) => $query->latest('issue_date')]);
+
         return view('clients.show', compact('client'));
     }
 
@@ -62,6 +64,11 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
+        if ($client->documents()->exists()) {
+            return to_route('clients.show', $client)
+                ->with('warning', 'Ce client possède un historique de devis ou de factures et ne peut pas être supprimé.');
+        }
+
         $client->delete();
 
         return to_route('clients.index')

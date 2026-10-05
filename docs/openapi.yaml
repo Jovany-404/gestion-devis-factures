@@ -1,0 +1,447 @@
+openapi: 3.1.0
+info:
+  title: Gestion de devis et factures
+  version: 1.0.0
+  description: >
+    API JSON v1 pour clients, catalogue, devis, factures et suivi des règlements.
+    Les jetons sont des Personal Access Tokens Laravel Sanctum créés dans l’espace
+    web. Les montants d’un devis sont relus dans le catalogue côté serveur.
+servers:
+  - url: /api/v1
+security:
+  - sanctumBearer: []
+tags:
+  - name: Clients
+  - name: Catalogue
+  - name: Devis
+  - name: Factures
+paths:
+  /clients:
+    get:
+      tags: [Clients]
+      summary: Lister ou rechercher les clients
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Page de clients.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Clients]
+      summary: Créer un client
+      security:
+        - sanctumBearer: [documents:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '201':
+          description: Client créé.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Client'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /articles:
+    get:
+      tags: [Catalogue]
+      summary: Lister les articles et tarifs actifs
+      parameters:
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Page d’articles actifs. Les prix sont en EUR hors taxes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticlePage'
+  /quotes:
+    get:
+      tags: [Devis]
+      summary: Lister les devis
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, sent, accepted, rejected]
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Page de devis.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentPage'
+    post:
+      tags: [Devis]
+      summary: Créer un devis brouillon
+      description: >
+        Le serveur attribue le numéro et lit le prix et la TVA depuis les articles
+        actifs du catalogue. Le client ne peut pas imposer des montants unitaires.
+      security:
+        - sanctumBearer: [documents:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteInput'
+      responses:
+        '201':
+          description: Devis brouillon créé.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /quotes/{document}:
+    get:
+      tags: [Devis]
+      summary: Lire un devis et ses lignes
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Devis.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /quotes/{document}/send:
+    post:
+      tags: [Devis]
+      summary: Marquer le devis brouillon comme envoyé
+      description: Enregistre l’état et programme la génération PDF. N’envoie pas d’e-mail.
+      security:
+        - sanctumBearer: [documents:write]
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Devis passé au statut sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /quotes/{document}/accept:
+    post:
+      tags: [Devis]
+      summary: Enregistrer l’acceptation d’un devis envoyé
+      security:
+        - sanctumBearer: [documents:write]
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Devis accepté.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /quotes/{document}/reject:
+    post:
+      tags: [Devis]
+      summary: Enregistrer le refus d’un devis envoyé
+      security:
+        - sanctumBearer: [documents:write]
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Devis refusé.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /quotes/{document}/convert:
+    post:
+      tags: [Devis]
+      summary: Convertir le devis accepté en facture
+      description: Conversion atomique unique. La facture conserve les lignes et les instantanés du devis.
+      security:
+        - sanctumBearer: [documents:write]
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '201':
+          description: Facture créée depuis le devis.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /invoices:
+    get:
+      tags: [Factures]
+      summary: Lister les factures
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, sent, paid, overdue, cancelled]
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Page de factures.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentPage'
+  /invoices/{document}:
+    get:
+      tags: [Factures]
+      summary: Lire une facture et ses lignes
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Facture.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /invoices/{document}/send:
+    post:
+      tags: [Factures]
+      summary: Marquer la facture brouillon comme envoyée
+      security:
+        - sanctumBearer: [documents:write]
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Facture passée au statut sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /invoices/{document}/pay:
+    post:
+      tags: [Factures]
+      summary: Enregistrer le paiement intégral de la facture
+      description: Réservé aux rôles administrateur et comptable. Les paiements partiels ne sont pas pris en charge.
+      security:
+        - sanctumBearer: [payments:write]
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Facture passée au statut paid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+components:
+  securitySchemes:
+    sanctumBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum personal access token
+      description: Jeton généré dans l’écran « Accès API » de l’application.
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Search:
+      name: search
+      in: query
+      schema:
+        type: string
+        maxLength: 100
+    DocumentId:
+      name: document
+      in: path
+      required: true
+      description: Identifiant numérique interne du document, pas son numéro DEV/FAC.
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    Unauthorized:
+      description: Jeton absent, invalide ou révoqué.
+    Forbidden:
+      description: Le rôle ou la capacité du jeton ne permet pas cette opération.
+    NotFound:
+      description: Document absent ou d’un autre type que celui de la route.
+    ValidationError:
+      description: Erreurs de validation métier ou transition de statut interdite.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+  schemas:
+    ClientInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, maxLength: 150 }
+        company: { type: [string, 'null'], maxLength: 150 }
+        email: { type: [string, 'null'], format: email }
+        phone: { type: [string, 'null'], maxLength: 50 }
+        address: { type: [string, 'null'], maxLength: 255 }
+        postal_code: { type: [string, 'null'], maxLength: 20 }
+        city: { type: [string, 'null'], maxLength: 100 }
+        notes: { type: [string, 'null'], maxLength: 5000 }
+    Client:
+      allOf:
+        - $ref: '#/components/schemas/ClientInput'
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+    ClientPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Client' }
+        meta:
+          $ref: '#/components/schemas/PageMeta'
+    Article:
+      type: object
+      properties:
+        id: { type: integer }
+        sku: { type: string }
+        name: { type: string }
+        description: { type: [string, 'null'] }
+        unit: { type: string }
+        unit_price: { type: string, description: Prix unitaire hors taxes en EUR }
+        tax_rate: { type: string }
+        is_active: { type: boolean }
+    ArticlePage:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Article' }
+        meta:
+          $ref: '#/components/schemas/PageMeta'
+    QuoteInput:
+      type: object
+      required: [client_id, lines]
+      properties:
+        client_id: { type: integer, minimum: 1 }
+        issue_date: { type: string, format: date }
+        valid_until: { type: [string, 'null'], format: date }
+        notes: { type: [string, 'null'], maxLength: 5000 }
+        terms: { type: [string, 'null'], maxLength: 5000 }
+        lines:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            type: object
+            required: [article_id, quantity]
+            properties:
+              article_id: { type: integer, minimum: 1 }
+              quantity: { type: number, exclusiveMinimum: 0, multipleOf: 0.01 }
+    DocumentLine:
+      type: object
+      properties:
+        description: { type: string }
+        unit: { type: string }
+        quantity: { type: string }
+        unit_price: { type: string }
+        tax_rate: { type: string }
+        subtotal: { type: string }
+        tax_amount: { type: string }
+        total: { type: string }
+    Document:
+      type: object
+      properties:
+        id: { type: integer }
+        type: { type: string, enum: [quote, invoice] }
+        number: { type: string, example: DEV-2026-0001 }
+        status: { type: string, enum: [draft, sent, accepted, rejected, paid, overdue, cancelled] }
+        client: { type: object, description: Coordonnées client figées à la création }
+        issue_date: { type: string, format: date }
+        due_date: { type: [string, 'null'], format: date }
+        valid_until: { type: [string, 'null'], format: date }
+        currency: { type: string, enum: [EUR] }
+        subtotal: { type: string }
+        tax_total: { type: string }
+        total: { type: string }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentLine' }
+        created_at: { type: string, format: date-time }
+    DocumentResponse:
+      type: object
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/Document' }
+    DocumentPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Document' }
+        links: { type: object }
+        meta: { $ref: '#/components/schemas/PageMeta' }
+    PageMeta:
+      type: object
+      properties:
+        current_page: { type: integer }
+        last_page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
